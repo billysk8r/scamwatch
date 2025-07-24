@@ -54,7 +54,7 @@ To run this project locally, follow these steps.
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/billysk8r/scamwatch.git](https://github.com/billysk8r/scamwatch.git)
+    git clone https://github.com/billysk8r/scamwatch.git
     cd scamwatch
     ```
 
