@@ -1,6 +1,6 @@
 # elb.gg Season of Scam Watch
 
-![Scam Watch Logo](/logo.jpeg)
+![Scam Watch Logo](/public/logo.jpeg)
 
 This project is a tool designed to monitor Twitch chats in real-time to identify and report potential scam messages and accounts. The backend identifies newly created, low-viewer channels, and the frontend provides an interface to view their chat rooms and take action against suspicious activity.
 
