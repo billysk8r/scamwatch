@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
+    <title>Scam Watch Live Chat</title>
+    <style>
+        :root {
+            --bg-color: #171626;
+            --purple: #653e9b;
+            --yellow: #ffec6c;
+            --text-color: #ffffff;
+            --chat-bg-color: #1C1B2B;
+            --message-bg-color: #212030;
+            --border-color: #555;
+            --footer-height: 90px;
+            --footer-height-mobile: 14rem;
+            /* Adjusted for input and button */
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tabs-container {
+            display: flex;
+            flex-shrink: 0;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            /* Allow tabs to scroll horizontally */
+            -webkit-overflow-scrolling: touch;
+            /* Smooth scrolling on iOS */
+            padding: 0.5rem 1rem 0;
+            /* Padding for aesthetic */
+        }
+
+        .tab-button {
+            background-color: #333;
+            color: var(--text-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
+            /* Prevent tab names from wrapping */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            margin-right: 2px;
+            /* Small gap between tabs */
+            display: flex;
+            /* Enable flexbox for content inside button */
+            align-items: center;
+            /* Vertically align text and close button */
+            gap: 0.5rem;
+            /* Space between text and close button */
+        }
+
+        .tab-button:hover {
+            background-color: #444;
+        }
+
+        .tab-button.active {
+            background-color: var(--chat-bg-color);
+            color: var(--yellow);
+            border-bottom: 2px solid var(--yellow);
+        }
+
+        .close-tab-button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 0.5rem;
+            /* Space from tab name */
+            transition: color 0.2s ease;
+        }
+
+        .close-tab-button:hover {
+            color: red;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: var(--chat-bg-color);
+            border-top: 1px solid var(--border-color);
+            scroll-behavior: auto;
+            box-sizing: border-box;
+            scrollbar-gutter: stable;
+            display: none;
+            /* Hidden by default, managed by JS */
+        }
+
+        .chat-container.active {
+            display: block;
+        }
+
+        .chat-message {
+            display: flex;
+            flex-wrap: nowrap;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0.8rem;
+            background-color: var(--message-bg-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 0;
+        }
+
+        .chat-message:last-child {
+            margin-bottom: 0;
+        }
+
+        .chat-channel,
+        .chat-username {
+            font-weight: bold;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .chat-channel {
+            color: var(--purple);
+        }
+
+        .chat-username {
+            color: var(--yellow);
+        }
+
+        .chat-message-text {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+
+        .chat-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .chat-button {
+            background-color: var(--purple);
+            color: var(--text-color);
+            border: none;
+            padding: 0.4rem 0.6rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+        }
+
+        .chat-button:hover {
+            background-color: #7b57b9;
+        }
+
+        /* Scrollbar styles for better aesthetics */
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: var(--chat-bg-color);
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: var(--purple);
+            border-radius: 4px;
+            border: 2px solid var(--chat-bg-color);
+        }
+
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background-color: #7b57b9;
+        }
+
+        .footer {
+            height: var(--footer-height);
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            /* Stack logo and filter controls */
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            padding: 0.5rem 1rem;
+            box-sizing: border-box;
+        }
+
+        .footer img {
+            height: 40px;
+            /* Smaller logo */
+            width: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 700px;
+            /* Increased max-width to accommodate dropdown */
+            justify-content: center;
+            align-items: center;
+            /* Vertically align items in filter controls */
+        }
+
+        .filter-label {
+            color: var(--text-color);
+            white-space: nowrap;
+            margin-right: 0.2rem;
+        }
+
+        .filter-input,
+        .filter-source-select {
+            flex-grow: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--message-bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .filter-source-select {
+            flex-grow: 0;
+            /* Don't let the select grow as much as input */
+            width: auto;
+            /* Allow content to dictate width */
+            margin-right: 0.5rem;
+        }
+
+        .filter-button {
+            background-color: var(--purple);
+            color: var(--text-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-button:hover {
+            background-color: #7b57b9;
+        }
+
+
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: 0.8rem;
+            }
+
+            .chat-message {
+                flex-wrap: wrap;
+                padding: 0.4rem 0.6rem;
+                align-items: flex-start;
+            }
+
+            .chat-channel,
+            .chat-username {
+                margin-right: 0.3rem;
+            }
+
+            .chat-message-text {
+                flex-basis: 100%;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                word-break: break-word;
+            }
+
+            .chat-buttons {
+                margin-left: auto;
+            }
+
+            .tabs-container {
+                padding: 0.5rem 0.5rem 0;
+            }
+
+            .tab-button {
+                padding: 0.4rem 0.8rem;
+            }
+
+            .footer {
+                height: var(--footer-height-mobile);
+                /* Maintain footer height on mobile */
+                padding: 0.5rem;
+            }
+
+            .filter-controls {
+                flex-wrap: wrap;
+                /* Allow controls to wrap on smaller screens */
+                justify-content: center;
+            }
+
+            .filter-input,
+            .filter-source-select,
+            .filter-button {
+                padding: 0.4rem 0.8rem;
+                width: 100%;
+                /* Make them full width on small screens */
+                margin-bottom: 0.5rem;
+                /* Add space between wrapped items */
+            }
+
+            .filter-label {
+                width: 100%;
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tabs-container" id="tabs-container">
+        <button class="tab-button active" data-tab-name="all">All</button>
+    </div>
+
+    <div id="chat-content-wrapper" style="flex-grow: 1; display: flex; flex-direction: column; overflow: hidden;">
+        <div class="chat-container active" id="chat-tab-all">
+        </div>
+    </div>
+
+    <div class="footer">
+        <img src="/logo.jpeg" alt="Logo">
+        <div class="filter-controls">
+            <input type="text" id="filter-keyword-input" class="filter-input" placeholder="Enter keyword to filter">
+            <label for="filter-source-select" class="filter-label">Init from:</label>
+            <select id="filter-source-select" class="filter-source-select"></select>
+            <button id="create-filter-button" class="filter-button">Create Filter Tab</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const tabsContainer = document.getElementById('tabs-container');
+        const chatContentWrapper = document.getElementById('chat-content-wrapper');
+        const filterKeywordInput = document.getElementById('filter-keyword-input');
+        const filterSourceSelect = document.getElementById('filter-source-select');
+        const createFilterButton = document.getElementById('create-filter-button');
+
+        const SCROLL_THRESHOLD = 200;
+        const MAX_MESSAGES = 32768; // Maximum number of messages per tab
+        const CLIPBOARD_CHAR_LIMIT = 2000; // Character limit for clipboard copy
+
+        let activeTab = 'all';
+        let previouslyActiveTab = 'all'; // New variable to remember the last active tab
+        const tabChatContainers = {
+            'all': document.getElementById('chat-tab-all')
+        };
+        const filterTabs = {}; // Stores { tabName: keyword }
+
+        // Function to update the source dropdown
+        function updateSourceDropdown(previousSelection = null) {
+            filterSourceSelect.innerHTML = ''; // Clear existing options
+            let selectionToRestore = previousSelection || 'all'; // Default to 'all' if no previous selection
+
+            for (const tabName in tabChatContainers) {
+                const option = document.createElement('option');
+                option.value = tabName;
+                option.textContent = tabName; // No capitalization enforced here
+                filterSourceSelect.appendChild(option);
+            }
+
+            // Restore previous selection if it still exists, otherwise default to 'all'
+            if (tabChatContainers[selectionToRestore]) {
+                filterSourceSelect.value = selectionToRestore;
+            } else {
+                filterSourceSelect.value = 'all';
+            }
+        }
+
+        // Call once on load to populate the initial dropdown
+        updateSourceDropdown();
+
+        // Function to create a message element
+        function createMessageElement(data) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('chat-message');
+
+            const channelSpan = document.createElement('span');
+            channelSpan.classList.add('chat-channel');
+            channelSpan.textContent = `[${data.channel}]`;
+
+            const usernameSpan = document.createElement('span');
+            usernameSpan.classList.add('chat-username');
+            usernameSpan.textContent = `${data.username}:`;
+
+            const messageTextSpan = document.createElement('span');
+            messageTextSpan.classList.add('chat-message-text');
+            messageTextSpan.textContent = data.message;
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.classList.add('chat-buttons');
+
+            const channelLinkButton = document.createElement('a'); // Change to <a>
+            channelLinkButton.classList.add('chat-button');
+            channelLinkButton.textContent = '🔗';
+            channelLinkButton.title = `Go to ${data.channel}'s stream`;
+            channelLinkButton.href = `https://www.twitch.tv/${data.channel}`; // Set href
+            channelLinkButton.target = '_blank'; // Open in new tab
+            channelLinkButton.rel = 'noopener noreferrer'; // Recommended for security
+
+            const flagButton = document.createElement('a');
+            flagButton.classList.add('chat-button');
+            flagButton.textContent = '🚩';
+            flagButton.title = `Copy message and view ${data.username}'s report page`;
+            flagButton.href = `https://www.twitch.tv/${data.username}/report`;
+            flagButton.target = '_blank';
+            flagButton.rel = 'noopener noreferrer';
+
+            // Handle left clicks (primary button) for flag button
+            flagButton.addEventListener('click', async (event) => {
+                event.preventDefault(); // Prevent default anchor navigation for left click
+                try {
+                    await navigator.clipboard.writeText(`"${data.message}"`);
+                    console.log('Message copied to clipboard:', data.message);
+                } catch (err) {
+                    console.error('Failed to copy message: ', err);
+                }
+                // Manually open the window for left-click after clipboard copy
+                window.open(flagButton.href, '_blank');
+            });
+
+            // Handle middle clicks (auxiliary button) for flag button
+            flagButton.addEventListener('auxclick', async (event) => {
+                // event.button will be 1 for middle click
+                if (event.button === 1) {
+                    try {
+                        await navigator.clipboard.writeText(`"${data.message}"`);
+                        console.log('Message copied to clipboard (middle click):', data.message);
+                    } catch (err) {
+                        console.error('Failed to copy message (middle click): ', err);
+                    }
+                }
+            });
+
+            const copyChatButton = document.createElement('a');
+            copyChatButton.classList.add('chat-button');
+            copyChatButton.textContent = '📄';
+            copyChatButton.title = `Copy recent tab messages and view ${data.username}'s report page`;
+            copyChatButton.href = `https://www.twitch.tv/${data.username}/report`;
+            copyChatButton.target = '_blank';
+            copyChatButton.addEventListener('click', async () => {
+                event.preventDefault(); // Prevent default anchor navigation for left click
+                const currentChatContainer = tabChatContainers[activeTab];
+                if (!currentChatContainer) return;
+
+                let messagesToCopy = [];
+                let currentLength = 0;
+
+                // Iterate messages in reverse to get most recent first
+                for (let i = currentChatContainer.children.length - 1; i >= 0; i--) {
+                    const messageElement = currentChatContainer.children[i];
+                    const channel = messageElement.querySelector('.chat-channel').textContent.replace('[', '').replace(']', '').trim();
+                    const username = messageElement.querySelector('.chat-username').textContent.replace(':', '').trim();
+                    const message = messageElement.querySelector('.chat-message-text').textContent;
+
+                    const formattedMessage = `[${channel}] ${username}: ${message}\n`;
+
+                    // Check if adding this message exceeds the limit
+                    if (currentLength + formattedMessage.length > CLIPBOARD_CHAR_LIMIT) {
+                        break; // Stop if adding this message would exceed the limit
+                    }
+
+                    messagesToCopy.unshift(formattedMessage); // Add to the beginning to maintain chronological order
+                    currentLength += formattedMessage.length;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(messagesToCopy.join(''));
+                    console.log('Recent messages copied to clipboard.');
+                } catch (err) {
+                    console.error('Failed to copy recent messages: ', err);
+                }
+                // Manually open the window for left-click after clipboard copy
+                window.open(copyChatButton.href, '_blank');
+            });
+
+            // Handle middle clicks (auxiliary button) for flag button
+            copyChatButton.addEventListener('auxclick', async (event) => {
+                // event.button will be 1 for middle click
+                if (event.button === 1) {
+                    const currentChatContainer = tabChatContainers[activeTab];
+                    if (!currentChatContainer) return;
+
+                    let messagesToCopy = [];
+                    let currentLength = 0;
+
+                    // Iterate messages in reverse to get most recent first
+                    for (let i = currentChatContainer.children.length - 1; i >= 0; i--) {
+                        const messageElement = currentChatContainer.children[i];
+                        const channel = messageElement.querySelector('.chat-channel').textContent.replace('[', '').replace(']', '').trim();
+                        const username = messageElement.querySelector('.chat-username').textContent.replace(':', '').trim();
+                        const message = messageElement.querySelector('.chat-message-text').textContent;
+
+                        const formattedMessage = `[${channel}] ${username}: ${message}\n`;
+
+                        // Check if adding this message exceeds the limit
+                        if (currentLength + formattedMessage.length > CLIPBOARD_CHAR_LIMIT) {
+                            break; // Stop if adding this message would exceed the limit
+                        }
+
+                        messagesToCopy.unshift(formattedMessage); // Add to the beginning to maintain chronological order
+                        currentLength += formattedMessage.length;
+                    }
+
+                    try {
+                        await navigator.clipboard.writeText(messagesToCopy.join(''));
+                        console.log('Recent messages copied to clipboard.');
+                    } catch (err) {
+                        console.error('Failed to copy recent messages: ', err);
+                    }
+                }
+            });
+
+            const rulesButton = document.createElement('a');
+            rulesButton.classList.add('chat-button');
+            rulesButton.textContent = '⚖️';
+            rulesButton.title = `Copy rules for ${data.username} in ${data.channel} and go to ${data.channel}'s stream`;
+            rulesButton.href = `https://www.twitch.tv/${data.channel}`;
+            rulesButton.target = '_blank';
+            rulesButton.rel = 'noopener noreferrer';
+
+            // Handle left clicks (primary button) for flag button
+            const rulesMessage = `${data.username} welcome to the chat of ${data.channel} ! Rules: 1. No Self-promo. 2. No sharing usernames. Thanks and enjoy supporting ${data.channel} !`;
+            rulesButton.addEventListener('click', async (event) => {
+                event.preventDefault(); // Prevent default anchor navigation for left click
+                try {
+                    await navigator.clipboard.writeText(rulesMessage);
+                    console.log('Message copied to clipboard:', rulesMessage);
+                } catch (err) {
+                    console.error('Failed to copy message: ', err);
+                }
+                // Manually open the window for left-click after clipboard copy
+                window.open(rulesButton.href, '_blank');
+            });
+
+            // Handle middle clicks (auxiliary button) for flag button
+            rulesButton.addEventListener('auxclick', async (event) => {
+                // event.button will be 1 for middle click
+                if (event.button === 1) {
+                    try {
+                        await navigator.clipboard.writeText(rulesMessage);
+                        console.log('Message copied to clipboard (middle click):', rulesMessage);
+                    } catch (err) {
+                        console.error('Failed to copy message (middle click): ', err);
+                    }
+                }
+            });
+
+
+            buttonsDiv.appendChild(channelLinkButton);
+            buttonsDiv.appendChild(flagButton);
+            buttonsDiv.appendChild(copyChatButton); // Append the new copy chat button
+            buttonsDiv.appendChild(rulesButton);
+
+            messageElement.appendChild(channelSpan);
+            messageElement.appendChild(usernameSpan);
+            messageElement.appendChild(messageTextSpan);
+            messageElement.appendChild(buttonsDiv);
+
+            return messageElement;
+        }
+
+        // Function to switch tabs
+        function switchTab(tabName) {
+            // Only update previouslyActiveTab if the activeTab is changing
+            if (activeTab !== tabName) {
+                previouslyActiveTab = activeTab;
+            }
+
+            // Deactivate current tab button and container
+            const currentActiveButton = document.querySelector('.tab-button.active');
+            if (currentActiveButton) {
+                currentActiveButton.classList.remove('active');
+            }
+            const currentActiveContainer = document.querySelector('.chat-container.active');
+            if (currentActiveContainer) {
+                currentActiveContainer.classList.remove('active');
+            }
+
+            // Activate new tab button and container
+            const newActiveButton = document.querySelector(`.tab-button[data-tab-name="${tabName}"]`);
+            if (newActiveButton) {
+                newActiveButton.classList.add('active');
+            }
+            const newActiveContainer = tabChatContainers[tabName];
+            if (newActiveContainer) {
+                newActiveContainer.classList.add('active');
+                // Auto-scroll to bottom when switching to a tab
+                newActiveContainer.scrollTop = newActiveContainer.scrollHeight;
+            }
+            activeTab = tabName;
+        }
+
+        // Event listener for tab clicks
+        tabsContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('tab-button')) {
+                const tabName = event.target.dataset.tabName;
+                if (tabName) {
+                    switchTab(tabName);
+                }
+            } else if (event.target.classList.contains('close-tab-button')) {
+                const tabButton = event.target.closest('.tab-button');
+                if (tabButton) {
+                    const tabName = tabButton.dataset.tabName;
+                    if (tabName !== 'all') { // Prevent closing the "All" tab
+                        const previousSourceSelection = filterSourceSelect.value; // Store current source dropdown selection
+
+                        // Remove the tab button
+                        tabButton.remove();
+
+                        // Remove the chat container
+                        const chatContainerToRemove = tabChatContainers[tabName];
+                        if (chatContainerToRemove) {
+                            chatContainerToRemove.remove();
+                        }
+
+                        // Remove from tracking objects
+                        delete tabChatContainers[tabName];
+                        delete filterTabs[tabName];
+
+                        // Update the source dropdown after removing a tab, preserving previous selection
+                        // If the removed tab was the source selection, default to 'all'
+                        updateSourceDropdown(previousSourceSelection === tabName ? 'all' : previousSourceSelection);
+
+                        // If the closed tab was the active one
+                        if (activeTab === tabName) {
+                            // Try to switch to the previously active tab
+                            if (tabChatContainers[previouslyActiveTab]) {
+                                switchTab(previouslyActiveTab);
+                            } else {
+                                // Fallback to "All" if the previously active tab no longer exists
+                                switchTab('all');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Auto-scroll logic for the currently active tab
+        function autoScroll(chatContainerElement) {
+            const isUserScrolling = chatContainerElement.scrollHeight - chatContainerElement.scrollTop - chatContainerElement.clientHeight > SCROLL_THRESHOLD;
+            if (!isUserScrolling) {
+                chatContainerElement.scrollTop = chatContainerElement.scrollHeight;
+            }
+        }
+
+        // Function to manage message count and remove oldest if limit exceeded
+        function enforceMessageLimit(container) {
+            while (container.children.length > MAX_MESSAGES) {
+                container.removeChild(container.firstElementChild);
+            }
+        }
+
+        socket.on('connect', () => {
+            console.log('Connected to Socket.IO server');
+            socket.emit('join-scamwatch');
+        });
+
+        socket.on('chat', (data) => {
+            // Append to "All" tab
+            const allMessageElement = createMessageElement(data);
+            tabChatContainers['all'].appendChild(allMessageElement);
+            enforceMessageLimit(tabChatContainers['all']); // Enforce limit
+            if (activeTab === 'all') {
+                autoScroll(tabChatContainers['all']);
+            }
+
+            // Check and append to existing filter tabs
+            for (const tabName in filterTabs) {
+                const keyword = filterTabs[tabName];
+                // Check if keyword is in message OR username
+                if (data.message.toLowerCase().includes(keyword.toLowerCase()) || data.username.toLowerCase() === keyword.toLowerCase()) {
+                    const filterMessageElement = createMessageElement(data);
+                    tabChatContainers[tabName].appendChild(filterMessageElement);
+                    enforceMessageLimit(tabChatContainers[tabName]); // Enforce limit
+                    if (activeTab === tabName) {
+                        autoScroll(tabChatContainers[tabName]);
+                    }
+                }
+            }
+        });
+
+        // Create Filter Tab logic
+        createFilterButton.addEventListener('click', () => {
+            const keyword = filterKeywordInput.value.trim();
+            const sourceTabName = filterSourceSelect.value; // Get the selected source tab
+
+            if (keyword && !filterTabs[keyword]) { // Check if keyword is not empty and tab doesn't already exist
+                const tabName = keyword; // Use keyword as tab name for simplicity
+
+                // Create new tab button
+                const tabButton = document.createElement('button');
+                tabButton.classList.add('tab-button');
+                tabButton.dataset.tabName = tabName;
+                tabButton.textContent = keyword;
+
+                const closeButton = document.createElement('button');
+                closeButton.classList.add('close-tab-button');
+                closeButton.textContent = 'x';
+                closeButton.title = `Close tab "${keyword}"`;
+                tabButton.appendChild(closeButton);
+
+                tabsContainer.appendChild(tabButton);
+
+                // Create new chat container for the filter tab
+                const newChatContainer = document.createElement('div');
+                newChatContainer.classList.add('chat-container');
+                newChatContainer.id = `chat-tab-${tabName}`;
+                chatContentWrapper.appendChild(newChatContainer);
+
+                // Store references
+                tabChatContainers[tabName] = newChatContainer;
+                filterTabs[tabName] = keyword;
+
+                // Populate the new tab by scanning the DOM of the *selected* source tab
+                const sourceTabContainer = tabChatContainers[sourceTabName];
+                if (sourceTabContainer) {
+                    Array.from(sourceTabContainer.children).forEach(messageElement => {
+                        // Extract message data from the DOM element
+                        const username = messageElement.querySelector('.chat-username').textContent.replace(':', '').trim();
+                        const message = messageElement.querySelector('.chat-message-text').textContent;
+                        const channel = messageElement.querySelector('.chat-channel').textContent.replace('[', '').replace(']', '').trim();
+
+                        const messageData = { channel: channel, username: username, message: message };
+
+                        // Check if keyword is in message OR username
+                        if (messageData.message.toLowerCase().includes(keyword.toLowerCase()) || messageData.username.toLowerCase() === keyword.toLowerCase()) {
+                            const clonedMessageElement = createMessageElement(messageData); // Recreate the element for the new tab
+                            newChatContainer.appendChild(clonedMessageElement);
+                        }
+                    });
+                    enforceMessageLimit(newChatContainer); // Enforce limit after population
+                }
+
+
+                // Clear input field
+                filterKeywordInput.value = '';
+
+                // Update the source dropdown to include the new tab, preserving current selection
+                updateSourceDropdown(filterSourceSelect.value);
+
+                // Switch to the newly created tab
+                switchTab(tabName);
+            } else if (filterTabs[keyword]) {
+                alert(`A tab for "${keyword}" already exists.`);
+                switchTab(keyword); // Switch to existing tab
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from Socket.IO server');
+        });
+    </script>
+</body>
+
+</html>
