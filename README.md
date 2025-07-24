@@ -6,7 +6,7 @@ This project is a tool designed to monitor Twitch chats in real-time to identify
 
 ---
 
-## ## Features
+## Features
 
 The core of this project is the `/scamwatch` page, which provides a powerful interface for monitoring and moderation.
 
@@ -23,7 +23,7 @@ The core of this project is the `/scamwatch` page, which provides a powerful int
 
 ---
 
-## ## Technical Overview
+## Technical Overview
 
 The application is built with a Node.js backend and a vanilla JavaScript frontend.
 
@@ -41,16 +41,16 @@ The application is built with a Node.js backend and a vanilla JavaScript fronten
 
 ---
 
-## ## Getting Started
+## Getting Started
 
 To run this project locally, follow these steps.
 
-### ### Prerequisites
+### Prerequisites
 
 * Node.js and npm
 * A Twitch Application for API credentials
 
-### ### Installation & Setup
+### Installation & Setup
 
 1.  **Clone the repository:**
     ```bash
@@ -77,7 +77,7 @@ To run this project locally, follow these steps.
     ```
     The server will start on `127.0.0.1:3000`.
 
-### ### Usage
+### Usage
 
 * Navigate to `http://localhost:3000` in your browser to see the landing page.
 * Navigate to `http://localhost:3000/scamwatch` to access the live chat monitoring tool.
