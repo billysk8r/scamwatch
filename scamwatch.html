@@ -133,6 +133,7 @@
             margin-bottom: 0;
         }
 
+        .chat-timestamp,
         .chat-channel,
         .chat-username {
             font-weight: bold;
@@ -404,6 +405,11 @@
             const messageElement = document.createElement('div');
             messageElement.classList.add('chat-message');
 
+            const timestampSpan = document.createElement('span');
+            timestampSpan.classList.add('chat-timestamp');
+            const now = new Date();
+            timestampSpan.textContent = `[${now.toLocaleTimeString('en-US', { hour12: false })}]`;
+
             const channelSpan = document.createElement('span');
             channelSpan.classList.add('chat-channel');
             channelSpan.textContent = `[${data.channel}]`;
@@ -581,6 +587,7 @@
             buttonsDiv.appendChild(copyChatButton); // Append the new copy chat button
             buttonsDiv.appendChild(rulesButton);
 
+            messageElement.appendChild(timestampSpan);
             messageElement.appendChild(channelSpan);
             messageElement.appendChild(usernameSpan);
             messageElement.appendChild(messageTextSpan);
